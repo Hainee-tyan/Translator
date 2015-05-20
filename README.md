@@ -5,4 +5,4 @@ To install plugin, download Translator.xpi file, in Firefox press "ctrl+O" and o
 
 WARNING! This is not ready yet! You can see translation window after select some text, but also there are some for-develop-only features.
 
-Powered by Haine
+Powered by Haine and Mem0
