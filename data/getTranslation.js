@@ -1,5 +1,5 @@
-﻿self.port.on("text", function(word) {
-	
+﻿self.port.on("translateWord", function(word) {
+
 	//this should not be hardcoded
 	var key = "dict.1.1.20150508T114605Z.d35c82ead74ccb72.f74324b7ec93ca680a19dd17a020aee671cee499";
 
@@ -8,9 +8,12 @@
 	var url = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=" + key + "&lang=en-ru&text=" + word;
 	
 	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {			
 			var translationJSON = JSON.parse(xmlhttp.responseText);
 			parseJSON(translationJSON);
+			
+			var height = document.body.offsetHeight;
+			self.port.emit("height", height + 16);
 		};
 	};
 
@@ -18,17 +21,17 @@
 	xmlhttp.send();
 
 	function parseJSON(translationJSON) {
-		
-		//HTML elements for different parts of JSON object
+					
+		//HTML elements for different parts of translation
 		var transcriptionHTML = document.getElementById("transcription");
 		var translationHTML = document.getElementById("translation");
-		
+	
+		//place word in it's html element
+		document.getElementById("word").innerHTML = word;
+
 		//translation array
 		var translationArray = translationJSON.def;
 		var translation = "";
-		
-		//place word in it's html element
-		document.getElementById("word").innerHTML = word;
 		
 		//if translation array has no values,
 		//we should show no translation
@@ -36,7 +39,7 @@
 			transcriptionHTML.innerHTML = "";
 			translationHTML.innerHTML = "Перевод не найден";
 			return;
-		}
+		};
 		
 		//transcription
 		if ("ts" in translationArray[0])

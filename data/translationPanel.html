@@ -1,14 +1,30 @@
 ﻿<html>
 
-<head></head>
+<head>
+<style>
+body {  
+  background: -webkit-linear-gradient(#99FF66, #FFFF66); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#99FF66, #FFFF66); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#99FF66, #FFFF66); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#99FF66, #FFFF66); /* Standard syntax */
+}
+
+#header
+{
+	font-weight: bold; 
+	font-size: 1.5em
+}
+</style></head>
 
 <body>
-	<div style="font-weight: bold; font-size: 1.5em">
+<div id = "outerTag">
+	<div id="header">
 		<span id="word"></span>
 		<span id="transcription"></span>
 	</div>
 	<hr>
     <div id="translation"></div>
+</div>
 </body>
 
 </html>
