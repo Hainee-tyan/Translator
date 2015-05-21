@@ -13,7 +13,7 @@
 			parseJSON(translationJSON);
 			
 			var height = document.body.offsetHeight;
-			self.port.emit("height", height + 16);
+			self.port.emit("readyToShow", height + 16);
 		};
 	};
 
