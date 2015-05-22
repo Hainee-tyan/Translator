@@ -12,9 +12,17 @@
 	
 	//operations on response
 	httpRequest.onreadystatechange = function() {
-		if (httpRequest.readyState == 4 /* && httpRequest.status == 200 */) {			
-			var translationJSON = JSON.parse(httpRequest.responseText);
-			parseJSON(translationJSON);
+		if (httpRequest.readyState == 4 /* && httpRequest.status == 200 */) {
+			
+			//handle case where returned value is not valid JSON
+			//or server didn't responsed at all
+			try {
+				var translationJSON = JSON.parse(httpRequest.responseText);
+				parseJSON(translationJSON);
+			}
+			catch (error) {
+				printError("Unknown error.");
+			};
 			
 			//send message to main add-on script, that
 			//document is ready to be shown
@@ -39,10 +47,11 @@
 		
 		//in case of error, give user as much information
 		//as you can
-		if (!("def" in translationJSON)) {
-			wordHTML.innerHTML = "ERROR";			
+ 		if (!("def" in translationJSON)) {
+			var errorMessage = "Unknown error.";		
 			if ("message" in translationJSON)
-				translationHTML.innerHTML = translationJSON.message;
+				errorMessage = translationJSON.message;
+			printError(errorMessage);
 			return;
 		};
 
@@ -53,7 +62,6 @@
 		//if translation array has no values,
 		//we should show no translation
 		if (translationArray.length < 1) {
-//			transcriptionHTML.innerHTML = "";
 			translationHTML.innerHTML = "Перевод не найден";
 			return;
 		};
@@ -89,4 +97,10 @@
 		
 		translationHTML.innerHTML = translation;
 	};
+	
+ 	function printError(errorMessage) {
+		document.getElementById("word").innerHTML = "ERROR";
+		document.getElementById("transcription").innerHTML = "";
+		document.getElementById("translation").innerHTML = errorMessage;
+	}; 
 });
