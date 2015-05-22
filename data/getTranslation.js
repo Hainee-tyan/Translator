@@ -1,33 +1,50 @@
 ﻿self.port.on("translateWord", function(word) {
-
 	//this should not be hardcoded
 	var key = "dict.1.1.20150508T114605Z.d35c82ead74ccb72.f74324b7ec93ca680a19dd17a020aee671cee499";
 
 	//xml request
-	var xmlhttp = new XMLHttpRequest();
+	var httpRequest = new XMLHttpRequest();
 	var url = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=" + key + "&lang=en-ru&text=" + word;
 	
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {			
-			var translationJSON = JSON.parse(xmlhttp.responseText);
+	//send request
+	httpRequest.open("GET", url, true);
+	httpRequest.send();
+	
+	//operations on response
+	httpRequest.onreadystatechange = function() {
+		if (httpRequest.readyState == 4 /* && httpRequest.status == 200 */) {			
+			var translationJSON = JSON.parse(httpRequest.responseText);
 			parseJSON(translationJSON);
 			
+			//send message to main add-on script, that
+			//document is ready to be shown
+			//send also height of document, so script 
+			//can resize panel
 			var height = document.body.offsetHeight;
 			self.port.emit("readyToShow", height + 16);
 		};
 	};
 
-	xmlhttp.open("GET", url, true);
-	xmlhttp.send();
-
 	function parseJSON(translationJSON) {
 					
 		//HTML elements for different parts of translation
+		var wordHTML = document.getElementById("word");
 		var transcriptionHTML = document.getElementById("transcription");
 		var translationHTML = document.getElementById("translation");
 	
-		//place word in it's html element
-		document.getElementById("word").innerHTML = word;
+		//place word in it's html element and clear other fields
+		wordHTML.innerHTML = word;
+		translationHTML.innerHTML = "";
+		transcriptionHTML.innerHTML = "";
+		
+		//in case of error, give user as much information
+		//as you can
+		if (!("def" in translationJSON)) {
+			wordHTML.innerHTML = "ERROR";			
+			if ("message" in translationJSON)
+				translationHTML.innerHTML = translationJSON.message;
+			return;
+		};
 
 		//translation array
 		var translationArray = translationJSON.def;
@@ -36,7 +53,7 @@
 		//if translation array has no values,
 		//we should show no translation
 		if (translationArray.length < 1) {
-			transcriptionHTML.innerHTML = "";
+//			transcriptionHTML.innerHTML = "";
 			translationHTML.innerHTML = "Перевод не найден";
 			return;
 		};
