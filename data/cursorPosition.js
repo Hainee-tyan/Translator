@@ -32,8 +32,8 @@
 	//to add-on main script
 	window.addEventListener("keydown", function(event) {
 		if (event.which === keyToPress && event.location === keyLocation) {
-
-			var word = getWordOnCoords(window.document.body, x, y);
+			var word = window.getSelection().toString().trim() 
+					|| getWordOnCoords(window.document.body, x, y);
 			self.port.emit("showPanel", x, y, word);
 		};
 	});
