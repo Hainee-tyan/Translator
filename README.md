@@ -9,7 +9,5 @@ You can also select some text and press right shift to see translation.
 
 There are 2 directions of translation: english-to-russian and russian-to-english, which is defined automatically depending on text.
 
-For now you can only translate 1 word at a time.
 
-
-WARNING! Plugin is not ready yet! It contains some features for-develop-only, numerous bugs and is not configurable.
+**WARNING!** Plugin is not ready yet! It contains some features for-develop-only, numerous bugs and is not configurable.
