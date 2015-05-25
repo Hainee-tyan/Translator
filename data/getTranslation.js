@@ -1,9 +1,23 @@
 ﻿self.port.on("translateWord", function(word) {
 	
-	var dictionaryURL = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?";
-	var dictionaryKey = "dict.1.1.20150508T114605Z.d35c82ead74ccb72.f74324b7ec93ca680a19dd17a020aee671cee499";
+	//specifications of Yandex.Dictionary and
+	//Yandex.Translation
+	var systemInformation = {
+		"dictionary": {
+			"url": "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?",
+			"key": "dict.1.1.20150508T114605Z.d35c82ead74ccb72.f74324b7ec93ca680a19dd17a020aee671cee499",
+			"property": "def"
+		},
+		"translation": {
+			"url": "https://translate.yandex.net/api/v1.5/tr.json/translate?",
+			"key": "trnsl.1.1.20150508T110245Z.27605ac05e213aef.e12e2ea8ceb3380bb3035192d56857fa747231b6",
+			"property": "text"
+		}
+	};
 	
-	//check language of word
+
+	//check language of word and specify direction
+	//of translation
 	var fromLanguage = "en";
 	var toLanguage = "ru";
 	
@@ -12,34 +26,17 @@
 		toLanguage = "en";
 	};
 	
-	//response from server
-	var translationJSON = translationRequest(dictionaryURL, dictionaryKey, fromLanguage, toLanguage, word);
+	//send request to server and inspect response
+	var inspection = inspectTranslation(systemInformation.dictionary, fromLanguage, toLanguage, word);
 	
-	//if function returned valid JSON object, inspect it
-	if (translationJSON != null)
-	{
-		//if there is no "def" property, request
-		//wasn't correct - tell user what was
-		//wrong ("message" property) if it's possible
-		if (!("def" in translationJSON)) {
-			var errorMessage = "Unknown error.";		
-			if ("message" in translationJSON)
-				errorMessage = translationJSON.message;
-			printError(errorMessage);
-		}
-		//request was correct, but there is no translation
-		else if (translationJSON.def.length < 1) {
+	//if inspection returned 0, it means there is no translation
+	//in dictionary, so we check yandex.translation service
+	if (inspection == 0) {
+		inspection = inspectTranslation(systemInformation.translation, fromLanguage, toLanguage, word);
+		//if inspection returned 0 again, we should admit
+		//there is no translation for this text
+		if (inspection == 0)
 			printError("Перевод не найден.");
-		}
-		//request was correct and there is at least 1 translation
-		else
-			parseJSON(translationJSON, word);
-	}
-	//if function returned null - it means
-	//server didn't responsed or response wasn't
-	//valid JSON object
-	else {
-		printError("Unknown error.");
 	};
 	
 	//send message to main add-on script, that
@@ -63,6 +60,11 @@ function parseJSON(translationJSON, word) {
 	wordHTML.innerHTML = word;
 	translationHTML.innerHTML = "";
 	transcriptionHTML.innerHTML = "";
+	
+	if ("text" in translationJSON) {
+		translationHTML.innerHTML = translationJSON.text;
+		return;
+	};
 
  	//translation array
 	var translationArray = translationJSON.def;
@@ -142,4 +144,40 @@ function isLatin(text) {
 	if (!engMatches || (ruMatches && ruMatches.length > engMatches.length)) 
 		return false;
 	return true;
+};
+
+
+//send request to server and inspect response.
+//prints error message of translation in panel
+//returns 0 if no translation found
+function inspectTranslation(systemInformation, fromLanguage, toLanguage, word) {
+	//response from server
+	var translationJSON = translationRequest(systemInformation.url, systemInformation.key, fromLanguage, toLanguage, word);
+	
+	//if function returned valid JSON object, inspect it
+	if (translationJSON != null) {
+		//if there is no needed property, request
+		//wasn't correct - return text of error
+		//("message" property) if possible
+		if (!(systemInformation.property in translationJSON)) {
+			var errorMessage = "Unknown error.";		
+			if ("message" in translationJSON)
+				errorMessage = translationJSON.message;
+			printError(errorMessage);
+		}
+		//request was correct, but there is no translation
+		else if (translationJSON[systemInformation.property].length < 1) {
+			return 0;
+		}
+		//request was correct and there is at least 1 translation
+		else {
+			parseJSON(translationJSON, word);
+		};
+	}
+	//if function returned null - it means
+	//server didn't responsed or response wasn't
+	//valid JSON object
+	else {
+		printError("Unknown error.");
+	};
 };
