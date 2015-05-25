@@ -9,7 +9,7 @@ function getWordOnCoords(node, x, y) {
     //Work with text itself
     if (node.nodeType == document.TEXT_NODE) {
         //split text into words
-        var strings = node.nodeValue.split(/[^a-zA-Z0-9]/);
+        var strings = node.nodeValue.split(/[^a-zA-Zа-яА-Я0-9]/);
         
         //start and end position of range
         var startOffset = 0;

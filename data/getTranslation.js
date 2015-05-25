@@ -2,7 +2,18 @@
 	
 	var dictionaryURL = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?";
 	var dictionaryKey = "dict.1.1.20150508T114605Z.d35c82ead74ccb72.f74324b7ec93ca680a19dd17a020aee671cee499";
-	var translationJSON = translationRequest(dictionaryURL, dictionaryKey, word);
+	
+	//check language of word
+	var fromLanguage = "en";
+	var toLanguage = "ru";
+	
+	if (!isLatin(word)) {
+		fromLanguage = "ru";
+		toLanguage = "en";
+	};
+	
+	//response from server
+	var translationJSON = translationRequest(dictionaryURL, dictionaryKey, fromLanguage, toLanguage, word);
 	
 	//if function returned valid JSON object, inspect it
 	if (translationJSON != null)
@@ -25,7 +36,7 @@
 			parseJSON(translationJSON, word);
 	}
 	//if function returned null - it means
-	//server didn't requested or request wasn't
+	//server didn't responsed or response wasn't
 	//valid JSON object
 	else {
 		printError("Unknown error.");
@@ -90,8 +101,9 @@ function parseJSON(translationJSON, word) {
 		
 	translationHTML.innerHTML = translation;
 };
-	
- function printError(errorMessage) {
+
+//print specified error message in panel
+function printError(errorMessage) {
 	document.getElementById("word").innerHTML = "ERROR";
 	document.getElementById("transcription").innerHTML = "";
 	document.getElementById("translation").innerHTML = errorMessage;
@@ -99,16 +111,12 @@ function parseJSON(translationJSON, word) {
 
 //send AJAX synchronous request to server,
 //returns valid JSON object or null in case of error
-function translationRequest(baseURL, key, word) {
-
-	//languages
-	var languageOfWord = "en";
-	var languageOfTranslation = "ru";
+function translationRequest(baseURL, key, fromLanguage, toLanguage, word) {
 
 	//xml request
 	var httpRequest = new XMLHttpRequest();
 	var url = baseURL + "key=" + key +
-			"&lang=" + languageOfWord + "-" + languageOfTranslation + 
+			"&lang=" + fromLanguage + "-" + toLanguage + 
 			"&text=" + word;
 	
 	//send request
@@ -124,4 +132,14 @@ function translationRequest(baseURL, key, word) {
 	catch (error) {
 		return null;
 	};
+};
+
+//function check if there is more
+//latin or cyrillic characters in text
+function isLatin(text) {
+	var engMatches = text.match(/[a-z]/ig);
+	var ruMatches = text.match(/[а-я]/ig);
+	if (!engMatches || (ruMatches && ruMatches.length > engMatches.length)) 
+		return false;
+	return true;
 };
